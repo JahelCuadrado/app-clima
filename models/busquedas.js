@@ -1,3 +1,5 @@
+const fs = require('fs');
+
 const axios = require('axios');
 const {v4: uuidv4} = require('uuid');
 
@@ -5,8 +7,10 @@ class Busquedas{
 
     historial = ['Madrid', 'Barcelona', 'Salamanca'];
 
+    dbPath = './db/database.json'
+
     constructor(){
-        //TODO: leer si DB existe
+        this.leerDB();
     }
 
 
@@ -24,6 +28,13 @@ class Busquedas{
             'units': 'metric',
             'lang': 'es',
         }
+    }
+
+    get historialCapitalizado(){
+        //Capitalizar cada palabra
+        return this.historial.map( lugar =>{ 
+            lugar.charAt(0).toUpperCase() + lugar.slice(1)
+    });
     }
 
 
@@ -47,7 +58,7 @@ class Busquedas{
                 lat: lugar.latitude
             }));
 
-            return [];
+            //return [];
 
          } catch (error) {
             console.log('Error: no responde');
@@ -81,6 +92,57 @@ class Busquedas{
         } catch (error) {
             console.log(error);
         }
+
+    }
+
+
+
+    agregarHistorial(lugar=''){
+
+        //TODO: prevenir duplicados
+        if(this.historial.includes(lugar.toLowerCase())){
+            return;
+        }
+
+        this.historial = this.historial.splice(0,5);
+
+        this.historial.unshift(lugar);
+
+        //TODO: Grabar en DB
+        this.guardarDB();
+
+
+    }
+
+
+    guardarDB(){
+
+        const payload = {
+            historial: this.historial
+        };
+
+        fs.writeFileSync(this.dbPath, JSON.stringify(payload));
+
+    }
+
+
+    leerDB(){
+
+        
+        let historial;
+        // Comprobar que existe la BBDD
+        if (fs.existsSync(this.dbPath)) {
+            const data = fs.readFileSync(this.dbPath, 'utf-8');
+            historial = JSON.parse(data);
+        }else{
+            console.log('No hay nada');
+            return;
+        }
+
+        this.historial = historial.historial;
+        // Si existe, leer la base de datos
+        //console.log(historial);
+        
 
     }
 

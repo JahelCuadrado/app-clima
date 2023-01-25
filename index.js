@@ -8,11 +8,12 @@ const main = async() =>{
 
     const busquedas = new Busquedas();
     let opt;
+    //await pausa();
 
     do {
 
         opt = await inquirerMenu();
-        if(opt == 2) await pausa();
+        if(opt == 0) await pausa();
 
         switch (opt) {
             case 1:
@@ -27,11 +28,16 @@ const main = async() =>{
 
                 if(id==0) break;
 
-                const lugarSeleccionado = lugares.find(lugar => lugar.id === id);
                 //console.log(lugarSeleccionado);
+                const lugarSeleccionado = lugares.find(lugar => lugar.id === id);
+
+                //Guardar en DB
+                busquedas.agregarHistorial(lugarSeleccionado.name);
+
 
                 const clima = await busquedas.climaLugar(lugarSeleccionado.lat, lugarSeleccionado.lng)
 
+                console.clear();
                 console.log('\nInformacion de la ciudad\n'.green);
                 console.log('Ciudad: ', lugarSeleccionado.name);
                 console.log('Latitud: ', lugarSeleccionado.lat);
@@ -45,11 +51,14 @@ const main = async() =>{
                 await pausa();
                 break;
             case 2:
+
+                busquedas.historialCapitalizado.forEach((lugar, i) => {
+                    const idx = `${i+1}. `.green;
+                    console.log(`${idx} ${lugar}`);
+                })
                 
-                break;
-            case 3:
-                
-                break;       
+                await pausa();
+                break;      
             default:
                 break;
         }
